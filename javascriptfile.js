@@ -2,7 +2,6 @@ let map;
 let draw;
 let navigationcoordinates=[];
 
-
 function drawMap(){
     let centerC=[24.928794, 60.165759];
     mapboxgl.accessToken ='pk.eyJ1Ijoibm9yYXJ5dGtvbGEiLCJhIjoiY2swZGg4cHV1MDdmbDNkcno5eHVnZXJkaiJ9.SovgLZ_LrV-jhUPNeZuETg';
@@ -13,8 +12,6 @@ function drawMap(){
             zoom: 9
         });
     }
-
-
 
 function haeNavireitti(navihaku){
 
@@ -41,7 +38,6 @@ function drawLine(kartanPisteet){
     if (map.getLayer("route")) {
         map.removeLayer("route");
     }
-
       map.addLayer({
             "id": "route",
             "type": "line",
@@ -65,12 +61,7 @@ function drawLine(kartanPisteet){
                 "line-color": "black",
                 "line-width": 3
             }
-        })
-
-
-
-
- 
+        }) 
 }
 
 function drawChart(){
@@ -88,7 +79,6 @@ function drawChart(){
             xhttp.send()
         })
     }  
-
     function getData(dom){                                           //haetaan data kuukausittaisiakilometrimääria varten..
         return new Promise(resolve=>{
             for(let i=dom.length; dom.length<=11; i++){
@@ -120,7 +110,6 @@ function drawChart(){
     }
 
     var chart = new google.visualization.ColumnChart(document.getElementById("chart"));
-
     return getJson()
         .then(dom=>{
     return getData(dom) })
@@ -232,10 +221,8 @@ function countDistance(){
                    haeNavireitti(navihaku)  
                         
                        
-            })  
-                
+            })                  
         }
-
 
 function setValue(){                                                //määritetään checkbox-valuet php-poistoa varten. Php suorittaa näiden avulla tietokannasta poiston käyttäjän niin määrätessä
     const checkbox=document.getElementsByClassName("poistettavat");
@@ -251,10 +238,6 @@ function piilota(){                                                 //elementti 
     const element=document.getElementById("naytaUuusimmat");
     element.style.display="none";
 }
-
-
-
-
 
 function autoComplete(element){                                     //haetaan apista ehdotuksia käyttäjän hakusanan mukaan ja luodaan option-valikko input-tagille
     const parent=element.parentNode; 

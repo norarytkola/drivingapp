@@ -1,15 +1,13 @@
-
 <?php
     //session avaaminen
-
-     session_start();
-    $palvelin= "localhost";
-    $kayttaja = "root"; 
-    $salasana = "";
-    $tietokanta = "ajokirja";
-    $yhteys = new mysqli($palvelin, $kayttaja, $salasana, $tietokanta);
-    if ($yhteys->connect_error) {
-        die("Yhteyden muodostaminen epäonnistui: " . $yhteys->connect_error);
+    session_start();
+    $server= "localhost";
+    $user = "root"; 
+    $password = "";
+    $dataTable= "ajokirja";
+    $connection = new mysqli($server, $user, $password, $tietokanta);
+    if ($connection->connect_error) {
+        die("Yhteyden muodostaminen epäonnistui: " . $connection->connect_error);
     }
 ?>
 
@@ -39,7 +37,7 @@
         </style>
 
 		<meta charset="UTF-8">	
-        <script src="/javascriptfile.js" type="text/javascript"></script>
+        <script src="/drivingapp/javascriptfile.js" type="text/javascript"></script>
         <script src="//code.jquery.com/jquery-1.9.1.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -58,8 +56,8 @@
     <nav class="navbar navbar-dark bg-dark">
         <h1 class="nav-item text-white ml-5">AJOHISTORIA </h1>
         <ul class="nav nav-tabs">
-            <a class="nav-link text-white" href="ajopvk.php">Lisää ajo</a>
-            <a class="nav-link disabled" href="/ajohistoria.php" style="color:white">Ajohistoria</a>
+            <a class="nav-link text-white" href="/drivingapp/ajopvk.php">Lisää ajo</a>
+            <a class="nav-link disabled" href="/drivingapp/ajohistoria.php" style="color:white">Ajohistoria</a>
         </ul>
     </nav>
 
@@ -93,25 +91,21 @@
                                 Hae auton rekisterinumerolla:   
                             </span>
                         </div>
-                        <select id='selection' name='select' onChange="getSelected()" class="form-control"><option></option>
-                                    
+                        <select id='selection' name='select' onChange="getSelected()" class="form-control"><option></option>             
                             <?php 
                     
-                                $onnistunuthaku=$yhteys->query("select distinct auto from ajotaulu");
+                                $onnistunuthaku=$connection->query("select distinct auto from ajotaulu");
                                 while($rnro=$onnistunuthaku->fetch_assoc()){
                                     echo("<option value='".$rnro['auto']."'>".$rnro['auto']."</option>");
                                     }
-                            
-
-                        ?>
+                            ?>
                         </select>
                         <div class="input-group-append">     
                             <input type="submit" name="filter" value="Hae" class="btn btn-secondary" id="jQ">  
                             <button id="naytaUusimmat" onClick="piilota()" class="btn btn-secondary">Näytä 10 uusinta</button>
                         </div>
                     </div>
-                </div>
-                                
+                </div>               
                  
                 <table class="table text-center">
                     <thead class="thead-light">
@@ -126,79 +120,78 @@
                     </thead>
                     <tbody>
 
-<?php 
-        if(isset($_POST["filter"])){
-            $hakuvv=mysqli_real_escape_string($yhteys,$_POST["vuosihaku"]);
-            $hakukk=mysqli_real_escape_string($yhteys,$_POST["kuukausihaku"]);
-            $hakurekkari=mysqli_real_escape_string($yhteys,$_POST["select"]);
-            $hakusql="select * from ajotaulu ";
-            if(isset($hakurekkari)&&$hakurekkari!=""&&isset($hakukk)&&($hakukk)!=""&&isset($hakuvv)&&$hakuvv=""){ 
-                $hakusql.=" where auto='$hakurekkari' and pvm='$hakuvv-$hakukk-%%";   
-            } else if(isset($hakurekkari)&&$hakurekkari!=""){
-          
-                $hakusql.="where auto='$hakurekkari'";
-                $tulokset=$yhteys->query($hakusql);
-            } else if(isset($_POST["vuosihaku"])&&($_POST["vuosihaku"]!="")&&(isset($_POST["kuukausihaku"])&&($_POST["kuukausihaku"]!=""))){
-                $hakusql.="where pvm between '$hakuvv-$hakukk-01' and '$hakuvv-$hakukk-31'";
-            }
-                $tulokset=$yhteys->query($hakusql);
-                if($tulokset==true){
-                    while($rivi=$tulokset->fetch_assoc()){
-                        $lista=explode(";",$rivi["osoitteet"]);
-                        $pudotusvalikko="<ul  class='list-group-flush'>";
-                        foreach($lista as $i=>$singleone){
-                            $pudotusvalikko.="<li class='list-group-item list-group-item-secondary'>$singleone</li>";
+        <?php 
+            if(isset($_POST["filter"])){
+                $hakuvv=mysqli_real_escape_string($connection,$_POST["vuosihaku"]);
+                $hakukk=mysqli_real_escape_string($connection,$_POST["kuukausihaku"]);
+                $hakurekkari=mysqli_real_escape_string($connection,$_POST["select"]);
+                $hakusql="select * from ajotaulu ";
+                if(isset($hakurekkari)&&$hakurekkari!=""&&isset($hakukk)&&($hakukk)!=""&&isset($hakuvv)&&$hakuvv=""){ 
+                    $hakusql.=" where auto='$hakurekkari' and pvm='$hakuvv-$hakukk-%%";   
+                } else if(isset($hakurekkari)&&$hakurekkari!=""){
+            
+                    $hakusql.="where auto='$hakurekkari'";
+                    $tulokset=$connection->query($hakusql);
+                } else if(isset($_POST["vuosihaku"])&&($_POST["vuosihaku"]!="")&&(isset($_POST["kuukausihaku"])&&($_POST["kuukausihaku"]!=""))){
+                    $hakusql.="where pvm between '$hakuvv-$hakukk-01' and '$hakuvv-$hakukk-31'";
+                }
+                    $tulokset=$connection->query($hakusql);
+                    if($tulokset==true){
+                        while($rivi=$tulokset->fetch_assoc()){
+                            $lista=explode(";",$rivi["osoitteet"]);
+                            $pudotusvalikko="<ul  class='list-group-flush'>";
+                            foreach($lista as $i=>$singleone){
+                                $pudotusvalikko.="<li class='list-group-item list-group-item-secondary'>$singleone</li>";
+                            }
+                            $pudotusvalikko.="</ul>";
+                            echo "<tr class='table-secondary'><td>".$rivi['pvm']. " </td><td> " .$rivi['kilometrit']. "</td><td>" .$rivi['ajaja']. " </td><td>" .$rivi['auto']. "</td><td>$pudotusvalikko</td><td>  <input type='checkbox' style='margin-right:0.5em;' class='poistettavat' name='poistettavat[]' id='".$rivi['ajo_id']."'>  valitse</td></tr>";        
                         }
-                        $pudotusvalikko.="</ul>";
-                        echo "<tr class='table-secondary'><td>".$rivi['pvm']. " </td><td> " .$rivi['kilometrit']. "</td><td>" .$rivi['ajaja']. " </td><td>" .$rivi['auto']. "</td><td>$pudotusvalikko</td><td>  <input type='checkbox' style='margin-right:0.5em;' class='poistettavat' name='poistettavat[]' id='".$rivi['ajo_id']."'>  valitse</td></tr>";        
+                    } else {
+                        echo("Hakusi ei tuottanut yhtään tuloksia.");
                     }
-                } else {
-                    echo("Hakusi ei tuottanut yhtään tuloksia.");
-                }
-?>
+        ?>
 
-    <SCRIPT>
-            const nappi=document.getElementById("naytaUusimmat");
-            nappi.style.display="block";
-    </SCRIPT>
-
-<?PHP
-        }else {
-            $sql="select * from ajotaulu ORDER BY pvm DESC limit 10";
-            $tulokset=$yhteys->query($sql);
-            while($rivi = $tulokset->fetch_assoc()) {
-                $lista=explode(";",$rivi["osoitteet"]);
-                $pudotusvalikko="<ul  class='list-group-flush'>";
-                foreach($lista as $i=>$singleone){
-                    $pudotusvalikko.="<li class='list-group-item  list-group-item-secondary'>$singleone</li>";
+        <SCRIPT>
+                const nappi=document.getElementById("naytaUusimmat");
+                nappi.style.display="block";
+        </SCRIPT>
+        <?PHP
+            }else {
+                $sql="select * from ajotaulu ORDER BY pvm DESC limit 10";
+                $tulokset=$connection->query($sql);
+                while($rivi = $tulokset->fetch_assoc()) {
+                    $lista=explode(";",$rivi["osoitteet"]);
+                    $pudotusvalikko="<ul  class='list-group-flush'>";
+                    foreach($lista as $i=>$singleone){
+                        $pudotusvalikko.="<li class='list-group-item  list-group-item-secondary'>$singleone</li>";
+                    }
+                    $pudotusvalikko.="</ul>";
+                    $formattedNum = number_format($rivi["kilometrit"], 2);
+                    echo "<tr class='table-secondary'><td>".$rivi['pvm']. " </td><td> " .$formattedNum. "</td><td>" .$rivi['ajaja']. " </td><td>" .$rivi['auto']. "</td><td>$pudotusvalikko</td><td class='text-danger'>  <input type='checkbox'  class='poistettavat' name='poistettavat[]' id='".$rivi['ajo_id']."'>valitse</td></tr>";      
                 }
-                $pudotusvalikko.="</ul>";
-                $formattedNum = number_format($rivi["kilometrit"], 2);
-                echo "<tr class='table-secondary'><td>".$rivi['pvm']. " </td><td> " .$formattedNum. "</td><td>" .$rivi['ajaja']. " </td><td>" .$rivi['auto']. "</td><td>$pudotusvalikko</td><td class='text-danger'>  <input type='checkbox'  class='poistettavat' name='poistettavat[]' id='".$rivi['ajo_id']."'>valitse</td></tr>";      
             }
-        }
 
-        if(isset($_POST["poisto"])){
-            foreach($_POST["poistettavat"] as $valinta){
-                 if (is_numeric($valinta)){  
-                        $sqlPoisto="delete from ajotaulu where ajo_id='$valinta'";
-                        $onnistunutPoisto=$yhteys->query($sqlPoisto); 
-                
-                }
-            }   
-        }       
-                                   
-?>
+            if(isset($_POST["poisto"])){
+                foreach($_POST["poistettavat"] as $valinta){
+                    if (is_numeric($valinta)){  
+                            $sqlPoisto="delete from ajotaulu where ajo_id='$valinta'";
+                            $onnistunutPoisto=$connection->query($sqlPoisto); 
+                    
+                    }
+                }   
+            }                                    
+        ?>
                         </tbody>
                     </table>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div class="row justify-content-center pt-5">
-        <div class="col-xl-8 col-lg-8 col-md-10 col-sm-12 col-xs-12">
-            <div id="kehys">
-                <div id="chart" style="opacity:0.8; width:100%; height:30em; object-fit: fill;"></div>
+        <div class="row justify-content-center pt-5">
+            <div class="col-xl-8 col-lg-8 col-md-10 col-sm-12 col-xs-12">
+                <div id="kehys">
+                    <div id="chart" style="opacity:0.8; width:100%; height:30em; object-fit: fill;"></div>
+                </div>
             </div>
         </div>
     </div>
